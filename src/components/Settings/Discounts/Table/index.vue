@@ -1,6 +1,7 @@
 <template lang="pug">
-  .table.wrapper.wrapper--header(:key="keyNumber")
+  .table.wrapper.wrapper--header
     DataTable(
+      :key="keyNumber"
       :loadData="$app.discounts.getAll"
       :columns="columns"
       :filter="$app.filters.getValues('settings')"
@@ -40,6 +41,10 @@ export default {
       dataset: {},
       isModal: false,
       row: {},
+      page: {
+        number: 0,
+        size: 0
+      },
       id: this.$app.filters.getValues('settings').studio,
       allStudiosName: [],
       rooms: [],
@@ -69,7 +74,8 @@ export default {
       this.singleStudio = await studios.getOne(studio).then(resp => resp.data)
       this.allStudiosName = items.map(item => item.name)
     },
-    async toggleDialogRow (row) {
+    async toggleDialogRow (row, page) {
+      this.page = page
       this.row = row
       this.isModal = true
     },
@@ -86,11 +92,11 @@ export default {
       }
       this.isModal = true
     },
-    createUpdate (id, value) {
+    async createUpdate (id, value) {
       if (!id) {
-        this.$app.discounts.addNew(value)
+        await this.$app.discounts.addNew(value)
       } else {
-        this.$app.discounts.updateOne(id, value)
+        await this.$app.discounts.updateOne(id, value)
       }
       this.isModal = false
       this.keyNumber++

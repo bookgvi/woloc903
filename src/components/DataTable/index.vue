@@ -57,6 +57,10 @@ export default {
   data () {
     return {
       data: [],
+      page: {
+        number: 1,
+        size: 10
+      },
       account: { amount: 0 },
       controlsRowId: undefined,
       dialogRowId: undefined,
@@ -67,7 +71,7 @@ export default {
       this.controlsRowId = this.controlsRowId === id ? undefined : id
     },
     toggleDialogRow (row) {
-      this.$emit('toggleDialogRow', row)
+      this.$emit('toggleDialogRow', row, this.page)
     }
   },
   computed: {
