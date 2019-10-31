@@ -10,8 +10,8 @@
       :style="{ background: 'none'}"
     )
       template(#header-cell="props")
-        q-th.header(:class="props.col.__thClass")
-          span {{props.col.label}}
+        q-th.header(style="text-align: center;")
+          span {{ props.col.label }}
 
       template(#top-left)
         .text-h6.inline-block {{ title }}
@@ -100,6 +100,8 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+  .qq
+    background-color orange
   .data-table
     padding-top: 12px
     .q-table__top

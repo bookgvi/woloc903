@@ -168,7 +168,9 @@ export default {
       }
       if (!end) {
         ({ end } = this.row.startedAt)
-        end = end.split(' ').shift()
+        try {
+          end = end.split(' ').shift()
+        } catch {}
       }
       const [{ id }] = this.rooms.filter(item => item.name === this.roomName)
       let value = typeof this.currentDayOfWeek
