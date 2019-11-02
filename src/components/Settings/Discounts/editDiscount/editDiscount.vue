@@ -82,7 +82,7 @@
         q-input.q-pt-sm.q-pb-md.cursor-pointer(
           :value="`${rangeTime.min}:00 — ${rangeTime.max}:00`"
           @click="isTimeRange = !isTimeRange"
-          @key.down.enter="timeRangeSave"
+          @keydown.enter="timeRangeSave"
           outlined
           dense
         )
