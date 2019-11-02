@@ -2,7 +2,6 @@ import axios from 'axios'
 import { stringify } from 'qs'
 import { LocalStorage, Notify } from 'quasar'
 
-// create an axios instance
 const currentURL = (_ => {
   const currentURL = window.location
   let baseURL = currentURL.hostname

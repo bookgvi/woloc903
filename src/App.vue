@@ -21,6 +21,7 @@ import filters from './controllers/filters'
 import promo from './controllers/promo'
 import discounts from './controllers/discounts'
 import jswidget from './controllers/jswidget'
+import organizationNotes from './controllers/organizationNotes'
 
 export default {
   name: 'App',
@@ -28,7 +29,7 @@ export default {
     Vue.prototype.$app = this
   },
   data () {
-    return [bookings, users, rooms, customers, events, extras, studios, login, refunds, documents, filters, finances, promo, discounts, jswidget].reduce(
+    return [bookings, users, rooms, customers, events, extras, studios, login, refunds, documents, filters, finances, promo, discounts, jswidget, organizationNotes].reduce(
       (acc, component) => ({ ...acc, [component.name]: new Vue(component) }),
       {}
     )

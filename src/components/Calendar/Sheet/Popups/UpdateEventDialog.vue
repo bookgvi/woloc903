@@ -298,7 +298,7 @@ export default {
         priceType: this.newBooking.eventType,
         extras: [],
         seats: 1,
-        description: this.newBooking.managerComment || ''
+        managerComment: this.newBooking.managerComment || ''
       }
       // console.log('post', params)
       return params
@@ -338,7 +338,7 @@ export default {
         priceType: this.newBooking.eventType,
         extras: [],
         seats: 1,
-        description: this.newBooking.managerComment || ''
+        managerComment: this.newBooking.managerComment || ''
       }
       // console.log('put', params)
       return {

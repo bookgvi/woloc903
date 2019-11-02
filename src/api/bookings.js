@@ -25,6 +25,15 @@ export default {
     }
   },
 
+  addNewTechnical: async (payload) => {
+    try {
+      const r = await api.post(`${API_URL}/bookings/technical`, payload)
+      return r.data
+    } catch (e) {
+      console.warn('catch :: bookings :: addNewtechnical', e)
+    }
+  },
+
   updateOne: async (payload) => {
     const { id, data } = payload
     try {

@@ -1,5 +1,5 @@
 <template lang="pug">
-  .promo.q-pa-md
+  .promo.q-pa-lg
     .row.q-pb-sm
       .col
         .text-h5 Скидка № {{ row.id }}
@@ -10,16 +10,19 @@
         span Локация
       .col
         span Зал
-    .row.q-pb-md
+        span.text-red &nbsp*
+    .row.q-pb-md(:key="modalKey")
       .col.q-pr-sm
-        q-select(v-model="singleStudio.name" :options="allStudiosName" outlined dense)
+        q-select(v-model="singleStudioName" :options="allStudiosName" @input="getRooms(singleStudioName)" outlined dense)
       .col
-        q-select(v-model="roomName" :options="rooms.map(item => item.name)" outlined dense)
+        q-select(v-model="roomName" :options="roomsOptions.map(item => item.name) || []" outlined dense)
     .row
       .col.q-pr-sm
         span Процент скидки
+        span.text-red &nbsp*
       .col
         span Минимальное кол-во часов
+        span.text-red &nbsp*
     .row.q-pb-md
       .col.q-pr-sm
         q-input(v-model="row.percent" outlined dense)
@@ -29,6 +32,7 @@
         q-input(v-model="row.minHours" outlined dense)
     .row
       span День недели
+      span.text-red &nbsp*
     .row.q-pb-sm(v-if="!row.id")
       .col.q-pr-sm
         .row
@@ -53,18 +57,20 @@
     .row
       .col.q-pr-sm
         span Период действия
+        span.text-red &nbsp*
       .col
         span Время действия
-    .row.q-pb-md
+        span.text-red &nbsp*
+    .row
       .col.q-pr-sm
         VueCtkDateTimePicker.q-pt-sm(
-          v-model="row.startedAt"
+          v-model="dateRange"
           color="#81AEB6"
-          formatted="DD MMM YY"
+          formatted="D MMMM Y"
           range
           no-shortcuts
           no-label
-          :label="String(dateRange)"
+          :label="dateLabel"
         )
       .col
         q-input.q-pt-sm.q-pb-md.cursor-pointer(:value="`${row.hourFrom}:00 — ${row.hourTo}:00`" @click="isTimeRange = !isTimeRange" outlined dense)
@@ -89,18 +95,22 @@
               q-btn(label="Сбросить" style="width: 100%" @click="timeRangeReset")
     .row.q-pb-md
       .col
-        span Заполните только дату начала, если срок действия должен быть неограничен.
+        span(style="font-weight: bold;") Заполните только дату начала, если срок действия должен быть неограничен.
+    .row.q-pb-md
+      q-checkbox(v-if="isActive" label="Скидка активна" v-model="isActive")
+      q-checkbox(v-else label="Скидка не активна" v-model="isActive")
     .row.justify-center
-      .col.q-mr-sm
-        q-btn.q-py-md(label="Удалить" no-caps style="width: 100%" @click="discountDelete")
+      .col.q-mr-sm(v-if="!row.new")
+        q-btn.q-py-md(label="Удалить" no-caps style="width: 100%" @click="discountDelete" :disable="row.new")
       .col
-        q-btn.q-py-md.bg-primary.text-white(label="Сохранить" no-caps style="width: 100%" @click="createUpdate")
+        q-btn.q-py-md.bg-primary.text-white(label="Сохранить" no-caps style="width: 100%" @click="createUpdate" :disable="isDisabled")
 </template>
 
 <script>
 import { date } from 'quasar'
 import { DateRange } from 'vue-date-range'
 import VueCtkDateTimePicker from 'vue-ctk-date-time-picker'
+import studios from '../../../../api/studios'
 export default {
   props: {
     getTitle: Function,
@@ -119,8 +129,12 @@ export default {
   },
   data () {
     return {
+      modalKey: 0,
       currentDayOfWeek: this.row.daysOfWeek,
-      roomName: this.rooms[0].name,
+      singleStudioName: this.singleStudio.name,
+      roomName: '',
+      roomsOptions: this.rooms,
+      isActive: true,
       daysOfWeekRadio: [
         { label: 'Понедельник', value: 1 },
         { label: 'Вторник', value: 2 },
@@ -135,19 +149,71 @@ export default {
       dateLabel: '',
       isTimeRange: false,
       rangeTime: {
-        min: this.row.hourFrom,
-        max: this.row.hourTo
+        min: 0,
+        max: 23
       }
+    }
+  },
+  computed: {
+    isDisabled () {
+      let isDisabled = true
+      let value
+      const typeDayOfWeek = typeof this.currentDayOfWeek
+      let daysOfWeek = this.daysOfWeek.reduce((prev, current) => {
+        return prev || current
+      }, false)
+      value = (typeDayOfWeek === 'number') || daysOfWeek
+      if (
+        this.roomName &&
+        this.row.percent &&
+        this.row.minHours &&
+        value &&
+        this.row.startedAt &&
+        this.rangeTime
+      ) {
+        isDisabled = false
+      }
+      return isDisabled
     }
   },
   async created () {
     await this.$nextTick()
     this.currentDayOfWeek = this.row.daysOfWeek
-    this.dateRange = `${date.formatDate(this.row.startedAt, 'D MMM')} — ${date.formatDate(this.row.expiredAt, 'D MMM YYYY')}`
+    if (this.row.studio) {
+      this.isActive = Boolean(this.row.isActive)
+      this.singleStudioName = this.row.studio.title
+    } else {
+      const { items } = await studios.getAll().then(resp => resp.data)
+      let { studio } = this.$app.filters.getValues('settings')
+      const [{ name }] = items.filter(item => item.id === studio)
+      this.singleStudioName = name
+    }
+    if (this.row.room) {
+      this.roomName = this.row.room.title
+    } else {
+      this.getRooms(this.singleStudioName)
+    }
+    this.dateRange = {
+      'start': date.formatDate(this.row.startedAt, 'YYYY-MM-DD'),
+      'end': date.formatDate(this.row.expiredAt, 'YYYY-MM-DD')
+    }
+    this.dateLabel = `${date.formatDate(this.row.startedAt, 'D MMM')} — ${date.formatDate(this.row.expiredAt, 'D MMM YYYY')}`
   },
   methods: {
     hasModal () {
       this.$emit('hasModal')
+    },
+    async getRooms (studioName) {
+      const { items } = await studios.getAll().then(resp => resp.data)
+      const studio = items.filter(item => item.name === studioName).pop()
+      this.roomName = ''
+      this.roomsOptions = []
+      if (studio.rooms[0]) {
+        this.roomName = studio.rooms[0].name
+        this.roomId = studio.rooms[0].id
+        this.roomsOptions = studio.rooms
+      }
+      this.modalKey++
     },
     timeRangeReset () {
       this.isTimeRange = false
@@ -160,19 +226,13 @@ export default {
       this.row.hourTo = this.rangeTime.max
     },
     createUpdate () {
-      let start = date.formatDate(this.row.startedAt, 'YYYY-MM-DD')
-      let end = date.formatDate(this.row.startedAt, 'YYYY-MM-DD')
-      if (!start) {
-        ({ start } = this.row.startedAt)
-        start = start.split(' ').shift()
+      if (this.dateRange.start) {
+        this.dateRange.start = this.dateRange.start.split(' ')[0]
       }
-      if (!end) {
-        ({ end } = this.row.startedAt)
-        try {
-          end = end.split(' ').shift()
-        } catch {}
+      if (this.dateRange.end) {
+        this.dateRange.end = this.dateRange.end.split(' ')[0]
       }
-      const [{ id }] = this.rooms.filter(item => item.name === this.roomName)
+      const [{ id }] = this.roomsOptions.filter(item => item.name === this.roomName)
       let value = typeof this.currentDayOfWeek
       if (value === 'number') {
         value = this.currentDayOfWeek
@@ -181,12 +241,12 @@ export default {
       }
       const newDiscount = {
         'room': id,
-        'isActive': 1,
+        'isActive': Number(this.isActive),
         'percent': this.row.percent,
         'minHours': this.row.minHours,
         'daysOfWeek': value,
-        'startedAt': start,
-        'expiredAt': end,
+        'startedAt': this.dateRange.start,
+        'expiredAt': this.dateRange.end,
         'hourFrom': this.row.hourFrom,
         'hourTo': this.row.hourTo
       }

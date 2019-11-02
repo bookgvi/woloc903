@@ -7,7 +7,7 @@ const defaultValues = {
   },
   settings: {
     studio: undefined,
-    rooms: undefined
+    rooms: []
   },
   calendar: {
     studio: 0,

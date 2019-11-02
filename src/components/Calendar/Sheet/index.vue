@@ -369,7 +369,7 @@ export default {
         priceType: booking.eventType,
         extras: [],
         seats: 1,
-        description: booking.managerComment || '',
+        managerComment: booking.managerComment || '',
         technical: booking.technical,
       })
       if (newBooking) {

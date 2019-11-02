@@ -1,12 +1,11 @@
 <template lang="pug">
-  .table.wrapper.wrapper--header
+  .table.wrapper.wrapper--header(:key="keyNumber")
     DataTable(
-      :key="keyNumber"
       :loadData="$app.discounts.getAll"
       :columns="columns"
       :filter="$app.filters.getValues('settings')"
       @toggleDialogRow="toggleDialogRow"
-      :isRowDisabled="({ expiredAt }) => !expiredAt"
+      :isRowDisabled="({ isActive } = row) => !Boolean(isActive)"
     )
       template(#table-controls-append)
         q-btn.q-ml-md.text-white.bg-primary(label="Добавить скидку" no-caps @click="addDiscount")
@@ -30,7 +29,6 @@ import editDiscount from '../editDiscount/editDiscount'
 import VueCtkDateTimePicker from 'vue-ctk-date-time-picker'
 import studios from '../../../../api/studios'
 import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css'
-
 export default {
   name: 'promoTable',
   components: { DataTable, editDiscount, VueCtkDateTimePicker },
@@ -41,10 +39,6 @@ export default {
       dataset: {},
       isModal: false,
       row: {},
-      page: {
-        number: 0,
-        size: 0
-      },
       id: this.$app.filters.getValues('settings').studio,
       allStudiosName: [],
       rooms: [],
@@ -74,8 +68,7 @@ export default {
       this.singleStudio = await studios.getOne(studio).then(resp => resp.data)
       this.allStudiosName = items.map(item => item.name)
     },
-    async toggleDialogRow (row, page) {
-      this.page = page
+    async toggleDialogRow (row) {
       this.row = row
       this.isModal = true
     },
@@ -87,8 +80,9 @@ export default {
       this.row = {
         hourFrom: 0,
         hourTo: 23,
-        startedAt: '2019-10-31T16:22:04+03:00',
-        expiredAt: '2019-10-31T16:22:04+03:00'
+        startedAt: new Date(),
+        expiredAt: new Date(),
+        new: true
       }
       this.isModal = true
     },
@@ -109,9 +103,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-  .q-card {
-    overflow: visible;
-  }
-</style>

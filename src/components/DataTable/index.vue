@@ -10,8 +10,8 @@
       :style="{ background: 'none'}"
     )
       template(#header-cell="props")
-        q-th.header(style="text-align: center;")
-          span {{ props.col.label }}
+        q-th.header(:class="props.col.__thClass")
+          span {{props.col.label}}
 
       template(#top-left)
         .text-h6.inline-block {{ title }}
@@ -57,10 +57,6 @@ export default {
   data () {
     return {
       data: [],
-      page: {
-        number: 1,
-        size: 10
-      },
       account: { amount: 0 },
       controlsRowId: undefined,
       dialogRowId: undefined,
@@ -71,7 +67,7 @@ export default {
       this.controlsRowId = this.controlsRowId === id ? undefined : id
     },
     toggleDialogRow (row) {
-      this.$emit('toggleDialogRow', row, this.page)
+      this.$emit('toggleDialogRow', row)
     }
   },
   computed: {
@@ -100,8 +96,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-  .qq
-    background-color orange
   .data-table
     padding-top: 12px
     .q-table__top

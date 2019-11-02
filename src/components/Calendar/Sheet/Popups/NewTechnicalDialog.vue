@@ -59,18 +59,17 @@ export default {
         return null
       }
       const params = {
-        roomId: this.newBooking.room.id,
+        room: { id: this.newBooking.room.id },
         reserveFrom: this.newBooking.reservedFrom,
         reserveTo: this.newBooking.reservedTo,
-        description: this.newBooking.managerComment || '',
-        technical: true
+        managerComment: this.newBooking.managerComment || ''
       }
       return params
     },
     async applyBooking () {
       const payload = this.setParamsForPost()
       if (payload) {
-        await this.$app.bookings.addNew(payload)
+        await this.$app.bookings.addNewTechnical(payload)
         if (this.$app.bookings.idOfJustAdded !== 0) {
           this.$emit('setQueryState', true)
         }

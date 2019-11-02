@@ -54,7 +54,6 @@ export default {
 /*  watch: {
     startExtras: {
       handler (v) {
-        console.log(this.checkedExtras)
         this.checkedExtras = Object.assign(this.checkedExtras, v)
       },
       immediate: true
