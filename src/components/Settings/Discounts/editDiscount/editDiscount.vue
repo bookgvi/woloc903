@@ -25,7 +25,7 @@
         span.text-red &nbsp*
     .row.q-pb-md
       .col.q-pr-sm
-        q-input(v-model="row.percent" outlined dense)
+        q-input(v-model="row.percent" :rules="[val => !!val || 'Field is required']" outlined dense)
           template(#append)
             span(style="font-size: 75%") %
       .col
