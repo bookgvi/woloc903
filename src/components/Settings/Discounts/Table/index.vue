@@ -53,7 +53,7 @@ export default {
       let filter = {}
       const { items } = await studios.getAll().then(resp => resp.data)
       let { studio } = this.$app.filters.getValues('settings')
-      let [{ rooms }] = items.filter(item => item.id === items[0].id)
+      const rooms = items[0].rooms
       if (!studio) {
         const roomsID = rooms.map(item => item.id)
         filter = Object.assign({}, {

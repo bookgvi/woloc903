@@ -4,7 +4,7 @@
       .col
         .text-h5 Скидка № {{ row.id }}
       .col-1
-        q-icon.cursor-pointer(name="close" @click="hasModal" style="font-size: 1.5rem;")
+        q-icon.cursor-pointer(name="close" v-close-popup style="font-size: 1.5rem;")
     .row
       .col.q-pr-sm
         span Локация
