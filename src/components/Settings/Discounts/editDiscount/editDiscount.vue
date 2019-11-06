@@ -260,7 +260,7 @@ export default {
         'minHours': this.row.minHours,
         'daysOfWeek': value,
         'startedAt': this.dateRange.start,
-        'expiredAt': this.dateRange.end,
+        'expiredAt': this.dateRange.end || null,
         'hourFrom': this.row.hourFrom,
         'hourTo': this.row.hourTo
       }

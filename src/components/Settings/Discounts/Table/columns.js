@@ -5,8 +5,9 @@ export default [
     name: 'room',
     label: 'Зал',
     active: true,
-    width: 200,
-    headerStyle: 'text-align: center;',
+    width: 180,
+    align: 'left',
+    headerStyle: 'text-align: left;',
   },
   {
     name: 'percent',

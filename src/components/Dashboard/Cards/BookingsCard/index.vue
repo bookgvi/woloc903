@@ -95,7 +95,7 @@ export default {
     },
     prepaymentSlot (index) {
       const booking = this.bookings[index]
-      return (+Number(booking.amount).toFixed()).toLocaleString('ru-RU', { style: 'decimal', useGrouping: true })
+      return (+Number(booking.prepayment).toFixed()).toLocaleString('ru-RU', { style: 'decimal', useGrouping: true })
     },
     paymentSlot (index) {
       const booking = this.bookings[index]

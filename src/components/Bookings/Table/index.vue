@@ -28,7 +28,6 @@ import columns from './columns.js'
 import details from './details'
 import DataTable from 'components/DataTable'
 import BookingsDialog from './BookingsDialog'
-import studios from '../../../api/studios'
 
 import { BOOKING_STATUSES } from 'src/common/constants'
 
@@ -43,29 +42,7 @@ export default {
     bookingRowData: {},
     room: {}
   }),
-  computed: {
-    returnFilter () {
-      this.filter()
-      return this.$app.filters.getValues('bookings')
-    }
-  },
   methods: {
-    async filter () {
-      let filter = {}
-      let { studio } = this.$app.filters.getValues('bookings')
-      const { items } = await studios.getAll().then(resp => resp.data)
-      if (!studio) {
-        let [{ rooms }] = items.filter(item => item.id === items[0].id)
-        rooms = rooms.map(item => item.id)
-        filter = Object.assign({}, {
-          studio: items[0].id,
-          rooms: rooms
-        })
-        this.$app.filters.setValue('bookings', 'studio', filter.studio)
-        this.$app.filters.setValue('bookings', 'rooms', filter.rooms)
-        this.$app.filters.setValue('bookings', 'statuses', [0, 1, 2, 3, 4])
-      }
-    },
     toggleDialogRow (row) {
       this.bookingRowData = row
       this.$nextTick(_ => {
@@ -73,8 +50,8 @@ export default {
       })
     }
   },
-  created () {
-    this.filter()
+  async created () {
+    await this.$app.filters.filterDefault('bookings')
   }
 }
 </script>

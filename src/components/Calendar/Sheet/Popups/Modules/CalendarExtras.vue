@@ -1,64 +1,89 @@
 <template lang="pug">
-  .col-12.flex.justify-left.items-center
-    q-option-group.text-body2(
-      v-model="checkedExtras"
-      :options="options"
-      color="green"
-      type="checkbox"
-    ) {{ extrasComp }}
+  .row.justify-left.items-center
+    .q-pa-none.text-body2(
+      v-if="$app.extras.extrasForRoom.length > 0"
+      style="width: 330px"
+    )
+      .row.justify-between.items-center.q-pb-md
+        .col-9.q-pa-none
+          span.q-pb-xs.text-body2.text-bold Услуга
+        .col.q-pa-none.text-right
+          span.q-pb-xs.text-body2.text-bold Кол-во
+      .q-pa-none(
+        v-for="(item, index) in options"
+        :key="index"
+        @mouseover="activeIndex = index"
+        )
+        .row.justify-between.items-center.q-pb-sm(v-if="index === activeIndex")
+          .col-9.q-pa-none
+            span.row.q-pb-sm.text-body2 {{ item.title }}
+            span.row.text-caption.text-bold {{ item.amount }} р.
+          .col.justify-right.q-pa-none
+            q-input.q-pb-md(
+              :rules="[val => (val >= 0) || 'Введите число, не меньшее нуля']"
+              dense
+              clear-icon="close"
+              style="width: 70px"
+              @input="onInput(index, $event)"
+              @keydown="keyHandler(item.count, index, $event)"
+              v-model.number="item.count"
+              type="number"
+            )
+              template(v-slot:append)
+                q-icon(name="close" @click="item.count = 0" class="cursor-pointer")
+        .row.justify-between.items-center.q-pb-sm(v-else)
+          .col-11.q-pa-none
+            span.row.text-body2 {{ item.title.slice(0, 20) }} ...
+          .col.q-pa-none
+            span.row.text-caption {{ item.count }}
+    span.text-body2(v-else) В этом зале нет доп. услуг
 </template>
 
 <script>
-// import sortBy from 'lodash/sortBy'
 
 export default {
   name: 'CalendarExtras',
   data () {
     return {
-      checkedExtras: [...this.startExtras]
+      activeIndex: -1,
     }
   },
   computed: {
-    extrasComp () {
-      return this.extrasChange()
-    },
     options () {
-      let arr = []
-      this.$app.extras.list.forEach(({ title, room }) => {
-        if (room.id === this.roomId) {
-          arr.push({
-            label: title,
-            value: title
-          })
-        }
-      })
-      return arr
+      if (!this.$app.extras.extrasForRoom) return []
+      return this.$app.extras.extrasForRoom
     }
   },
   methods: {
-    extrasChange () {
-      this.$emit('extrasChange', [...this.checkedExtras])
+    onInput (index, val) {
+      if (!val || val === '') {
+        if (!this.$app.extras.extrasForRoom || !this.$app.extras.extrasForRoom[index]) return
+        this.$app.extras.extrasForRoom[index].count = 0
+      }
+    },
+    keyHandler (val, index, evt) {
+      if (val < 1 && evt.key === 'ArrowDown') {
+        evt.preventDefault()
+      }
+      if (evt.key === '-' || evt.key === 'e') {
+        evt.preventDefault()
+      }
     }
   },
   props: {
-    startExtras: {
-      type: Array,
-      default: _ => {
-        return []
-      }
-    },
     roomId: {
       type: Number
     }
   },
-/*  watch: {
-    startExtras: {
-      handler (v) {
-        this.checkedExtras = Object.assign(this.checkedExtras, v)
+  watch: {
+    roomId: {
+      async handler (v) {
+        if (v === 0) return
+        await this.$app.extras.getForCalendar({ room: v })
       },
       immediate: true
     }
-  } */
+  }
 }
 </script>
 

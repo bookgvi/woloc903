@@ -1,6 +1,6 @@
 <template lang="pug">
   .wrapper--header
-    .row.q-pt-lg.col-12.justify-around
+    .row.q-pt-lg.col-12.justify-around.q-col-gutter-md
       .column.col-4
         profit-card
         finances-card

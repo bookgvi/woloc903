@@ -73,7 +73,7 @@ export default {
       this.positions.forEach((position) => {
         sum += +position.price
       })
-      return sum
+      return sum || 0
     },
     priceWithDiscount () {
       return +this.price + +this.discount

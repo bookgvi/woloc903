@@ -91,8 +91,6 @@
               .col-7.q-py-sm
                 span.text-grey {{ extrasSlot }}
             calendar-extras.q-pa-md(
-              @extrasChange="helpers.checkedExtras = [...$event]"
-              :startExtras="[...helpers.checkedExtras]"
               :roomId="roomId"
             )
           q-expansion-item(
@@ -173,7 +171,6 @@ export default {
       newBooking: {},
       helpers: {
         date: '',
-        checkedExtras: [],
         time: {
           from: 0,
           to: 0
@@ -200,17 +197,10 @@ export default {
       return this.room.id || 0
     },
     extras () {
-      if (!this.helpers.checkedExtras) {
+      if (!this.$app.extras.extrasForRoom || this.$app.extras.extrasForRoom.length === 0) {
         return []
       } else {
-        return this.helpers.checkedExtras.map(item => {
-          const extra = this.$app.extras.list.find(extra => extra.name === item)
-          if (!extra) return { name: item, price: 0 }
-          return {
-            name: item,
-            price: extra.price
-          }
-        })
+        return this.$app.extras.extrasForRoom
       }
     },
     customerSlot () {
@@ -242,8 +232,14 @@ export default {
       }
     },
     extrasSlot () {
-      if (!this.helpers.checkedExtras) return 0
-      return this.helpers.checkedExtras.length
+      if (!this.$app.extras.extrasForRoom) return 0
+      let count = 0
+      this.$app.extras.extrasForRoom.forEach(item => {
+        if (item.count > 0) {
+          count++
+        }
+      })
+      return count
     },
     membersSlot () {
       return this.newBooking.members.length
@@ -290,13 +286,23 @@ export default {
         })
         return null
       }
+      let extras = []
+      if (this.$app.extras.extrasForRoom || this.$app.extras.extrasForRoom.length > 0) {
+        this.$app.extras.extrasForRoom.forEach(item => {
+          if (item.count === 0) return
+          extras.push({
+            id: item.id,
+            count: item.count
+          })
+        })
+      }
       const params = {
         roomId: this.newBooking.room.id,
         consumerId: this.newBooking.customer.id,
         reserveFrom: this.newBooking.reservedFrom,
         reserveTo: this.newBooking.reservedTo,
         priceType: this.newBooking.eventType,
-        extras: [],
+        extras: extras,
         seats: 1,
         managerComment: this.newBooking.managerComment || ''
       }
@@ -331,12 +337,22 @@ export default {
         })
         return null
       }
+      let extras = []
+      if (this.$app.extras.extrasForRoom || this.$app.extras.extrasForRoom.length > 0) {
+        this.$app.extras.extrasForRoom.forEach(item => {
+          if (!Number.isInteger(item.count) || item.count === 0) return
+          extras.push({
+            id: item.id,
+            count: item.count
+          })
+        })
+      }
       const params = {
         roomId: this.newBooking.room.id,
         reserveFrom: this.newBooking.reservedFrom,
         reserveTo: this.newBooking.reservedTo,
         priceType: this.newBooking.eventType,
-        extras: [],
+        extras: extras,
         seats: 1,
         managerComment: this.newBooking.managerComment || ''
       }
@@ -356,6 +372,7 @@ export default {
           await this.$app.bookings.addNew(payload)
           if (this.$app.bookings.idOfJustAdded !== 0) {
             this.$emit('setQueryState', true)
+            this.$app.extras.extrasForRoom = []
           }
         }
       } else {
@@ -364,6 +381,7 @@ export default {
           await this.$app.bookings.updateOne(payload.id, payload.data)
           if (this.$app.bookings.idOfJustAdded !== 0) {
             this.$emit('setQueryState', true)
+            this.$app.extras.extrasForRoom = []
           }
         }
       }
@@ -384,9 +402,8 @@ export default {
         const hDate = this.$moment.parseZone(this.newBooking.reservedFrom).format('YYYY-MM-DD')
         const hFrom = +this.$moment.parseZone(this.newBooking.reservedFrom).format('H')
         let hTo = +this.$moment.parseZone(this.newBooking.reservedTo).format('k')
-        let checkedExtras = []
         if (this.newBooking.extras && this.newBooking.extras.items) {
-          checkedExtras = this.newBooking.extras.items.map(item => item.name)
+          this.$app.extras.extrasForRoom = this.newBooking.extras.items
         }
         this.helpers = Object.assign(this.helpers, {
           date: hDate,
@@ -394,7 +411,6 @@ export default {
             from: hFrom,
             to: hTo
           },
-          checkedExtras: [...checkedExtras]
         })
       })
     }

@@ -1,5 +1,5 @@
 <template lang="pug">
-  .settings
+  .settings(:key="pageReload")
     div(v-show="false") {{ studioID }}
     q-tab-panels(v-model="currentTab")
       q-tab-panel.q-pa-none(name="Локация")
@@ -35,6 +35,7 @@ export default {
   },
   data () {
     return {
+      pageReload: 0,
       id: this.$app.filters.getValues('settings').studio,
       isRequiredModal: false,
       currentTab: 'Локация',
@@ -56,16 +57,12 @@ export default {
   },
   methods: {
     async singleStudioM () {
-      let { studio } = this.$app.filters.getValues('settings')
       const { items } = await studios.getAll().then(resp => resp.data)
-      if (!studio) {
-        studio = items[0].id
-      }
-      this.currentStudio = studio
-      this.isSave = false
-      const [{ rooms }] = items.filter(item => item.id === studio)
+      let { studio } = this.$app.filters.getValues('settings')
+      const rooms = items[0].rooms
       this.rooms = rooms
       this.singleStudio = await studios.getOne(studio).then(resp => resp.data)
+      this.allStudiosName = items.map(item => item.name)
       this.services = this.singleStudio.services
       this.vendors = this.singleStudio.vendors
     },
@@ -112,9 +109,11 @@ export default {
       if (result) {
         this.isSave = false
       }
+      this.pageReload++
     }
   },
   async mounted () {
+    await this.$app.filters.filterDefault('settings')
     this.singleStudioM()
   }
 }

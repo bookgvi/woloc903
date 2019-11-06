@@ -11,7 +11,11 @@ export default {
   },
   methods: {
     async onRequest (pagination, filter) {
-      if (this.$route.path === '/bookings' || this.$route.path === '/settings/discounts') {
+      if (
+        this.$route.path === '/bookings' ||
+        this.$route.path === '/settings' ||
+        this.$route.path === '/settings/discounts'
+      ) {
         if (!filter.studio) {
           const { items } = await studios.getAll().then(resp => resp.data)
           filter = Object.assign({}, { studio: items[0].id })

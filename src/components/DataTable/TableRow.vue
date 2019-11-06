@@ -151,7 +151,7 @@ export default {
     .active
       cursor: pointer
     .room-col .q-chip
-      width 100%
+      width 100px
       border-radius 3px
       .q-chip__content
         width 100%

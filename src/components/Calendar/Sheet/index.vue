@@ -367,9 +367,9 @@ export default {
         reserveFrom: from,
         reserveTo: to,
         priceType: booking.eventType,
-        extras: [],
-        seats: 1,
-        managerComment: booking.managerComment || '',
+        extras: booking.extras,
+        seats: booking.seats,
+        description: booking.managerComment || '',
         technical: booking.technical,
       })
       if (newBooking) {
@@ -525,6 +525,7 @@ export default {
         reservedFrom: this.$moment(`${date}T${String(this.forNewBooking.from).padStart(2, '0')}:00`),
         reservedTo: this.$moment(`${date}T${String(this.forNewBooking.to + 1).padStart(2, '0')}:00`),
         room: this.filter.rooms[0] || '',
+        extras: [],
         eventType: '',
         studio: this.studio,
         filter: this.filter
@@ -673,7 +674,8 @@ export default {
   watch: {
     bookings: {
       handler (v) {
-        // console.log('watch bookings', v)
+        // const l = [...v]
+        // console.log('watch bookings', l.sort())
         this.events = []
         let allEvents = []
         let bookings = []
